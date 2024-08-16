@@ -1,8 +1,13 @@
 import ccxt
+import pandas as pd
 
-exchange = ccxt.coinbase()  # Initialize the Coinbase exchange
-ticker = exchange.fetch_ticker('BTC/USD')
-print(f"Last price of BTC/USD on Coinbase: {ticker['last']}")
+def fetch_ohlcv(exchange_id='coinbase', symbol='BTC/USD', timeframe='1h', limit=100):
+    exchange = getattr(ccxt, exchange_id)()
+    ohlcv = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
+    data = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    data['timestamp'] = pd.to_datetime(data['timestamp'], unit = 'ms')
+    return data
 
-ohlcv = exchange.fetch_ohlcv('BTC/USDT', timeframe='1m', limit=10)
-print(ohlcv)
+if __name__ == "__main__":
+    data = fetch_ohlcv()
+    print(data.tail())
